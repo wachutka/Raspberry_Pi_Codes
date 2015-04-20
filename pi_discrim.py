@@ -137,6 +137,8 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 	suctrials = 0
 	nacltrials = 0
 	nopoke = 0
+	nopokecount = 0
+	nopokepun = 10
 	poke = 0
 	
 
@@ -233,11 +235,13 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 						time.sleep(opentimes[1])
 						GPIO.output(outports[1], 0)
 						poke = 1
+						nopokecount = 0
 						trial += 1
 						succorrect += 1
 						break
 					elif GPIO.input(inports[2]) == 0:
 						poke = 1
+						nopokecount = 0
 						GPIO.output(pokelights[0], 0)
 						GPIO.output(pokelights[2], 0)
 						time.sleep(10)
@@ -271,11 +275,13 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 						time.sleep(opentimes[1])
 						GPIO.output(outports[1], 0)
 						poke = 1
+						nopokecount = 0
 						trial += 1
 						naclcorrect += 1
 						break
 					elif GPIO.input(inports[0]) == 0:
 						poke = 1
+						nopokecount = 0
 						GPIO.output(pokelights[0], 0)
 						GPIO.output(pokelights[2], 0)
 						time.sleep(10)
@@ -286,10 +292,12 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 
 			if poke == 0:
 				nopoke += 1
+				nopokecount += 1
 				GPIO.output(pokelights[0], 0)
 				GPIO.output(pokelights[2], 0)
 				print('Last trial had no poke. '+str(trial)+' trials completed. '+str(totalcorrect)+' of '+str(totaltrials)+' correct trials thus far.')
-				time.sleep(10)
+				nopokepun = nopokecount * 10
+				time.sleep(nopokepun)
 			else:
 				print(str(trial)+' of '+str(trials)+' trials completed. '+str(totalcorrect)+' of '+str(totaltrials)+' correct trials thus far.')
 			
