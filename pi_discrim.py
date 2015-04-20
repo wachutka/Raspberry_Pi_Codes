@@ -112,7 +112,8 @@ def basic_np(outport = 31, opentime = 0.011, iti = [4, 8, 12], trials = 120, out
 			while (curtime - poketime) <= delay:
 				if GPIO.input(inport) == 0:
 					poketime = time.time()
-				curtime = time.time()
+				This trial will be NaCl/Sacc (R)
+curtime = time.time()
 
 		
 	print('Basic nose poking has been completed.')
@@ -122,7 +123,7 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 
 	GPIO.setmode(GPIO.BOARD)
 	blocked = 1			# blocked = 1 for blocked, 0 for random
-	startside = 1
+	startside = 0
 	outtime = 0.25
 	trial = 0
 	bothpl = 0			# bothpl = 1 for both lights, 0 for cue light only
@@ -131,9 +132,9 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 	#trialdur = 10			# trial duration (rat must respond within this time or trial is counted as no-poke)
 	tarray = []
 
-	cacorrect = 0
+	succorrect = 0
 	naclcorrect = 0
-	catrials = 0
+	suctrials = 0
 	nacltrials = 0
 	nopoke = 0
 	poke = 0
@@ -206,7 +207,7 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 			
 # Deliver cue taste and manipulate cue lights (depends on setting for bothpl)
 			if tarray[trial] == 0:
-				catrials += 1
+				suctrials += 1
 				GPIO.output(outports[0], 1)
 				time.sleep(opentimes[0])
 				GPIO.output(outports[0], 0)
@@ -222,19 +223,24 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 				curtime = timestart
 				while (curtime - timestart) <= trialdur:
 					if GPIO.input(inports[0]) == 0:
+						GPIO.output(pokelights[0], 0)
+						GPIO.output(pokelights[2], 0)
 						GPIO.output(outports[1], 1)
 						time.sleep(opentimes[1])
 						GPIO.output(outports[1], 0)
-						GPIO.output(pokelights[0], 0)
-						GPIO.output(pokelights[2], 0)
+						time.sleep(1)
+						GPIO.output(outports[1], 1)
+						time.sleep(opentimes[1])
+						GPIO.output(outports[1], 0)
 						poke = 1
-						cacorrect += 1
+						trial += 1
+						succorrect += 1
 						break
 					elif GPIO.input(inports[2]) == 0:
 						poke = 1
 						GPIO.output(pokelights[0], 0)
 						GPIO.output(pokelights[2], 0)
-						time.sleep(5)
+						time.sleep(10)
 						break
 					curtime = time.time()
 # Deliver cue taste and manipulate cue lights (depends on setting for bothpl)	
@@ -255,31 +261,37 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 				curtime = timestart
 				while (curtime - timestart) <= trialdur:
 					if GPIO.input(inports[2]) == 0:
+						GPIO.output(pokelights[0], 0)
+						GPIO.output(pokelights[2], 0)
 						GPIO.output(outports[1], 1)
 						time.sleep(opentimes[1])
 						GPIO.output(outports[1], 0)
-						GPIO.output(pokelights[0], 0)
-						GPIO.output(pokelights[2], 0)
+						time.sleep(1)
+						GPIO.output(outports[1], 1)
+						time.sleep(opentimes[1])
+						GPIO.output(outports[1], 0)
 						poke = 1
+						trial += 1
 						naclcorrect += 1
 						break
 					elif GPIO.input(inports[0]) == 0:
 						poke = 1
 						GPIO.output(pokelights[0], 0)
 						GPIO.output(pokelights[2], 0)
-						time.sleep(5)
+						time.sleep(10)
 						break
 					curtime = time.time()
-			totalcorrect = cacorrect + naclcorrect
-			trial += 1
+			totalcorrect = succorrect + naclcorrect
+			totaltrials = suctrials + nacltrials
+
 			if poke == 0:
 				nopoke += 1
 				GPIO.output(pokelights[0], 0)
 				GPIO.output(pokelights[2], 0)
-				print('Last trial had no poke. '+str(trial)+' of '+str(trials)+' completed. '+str(totalcorrect)+' correct trials thus far.')
+				print('Last trial had no poke. '+str(trial)+' trials completed. '+str(totalcorrect)+' of '+str(totaltrials)+' correct trials thus far.')
 				time.sleep(10)
 			else:
-				print(str(trial)+' of '+str(trials)+' completed. '+str(totalcorrect)+' correct trials thus far.')
+				print(str(trial)+' of '+str(trials)+' trials completed. '+str(totalcorrect)+' of '+str(totaltrials)+' correct trials thus far.')
 			
 			poke = 0
 			lights = 0
@@ -296,5 +308,5 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 					poketime = time.time()
 				curtime = time.time()
 
-	print('Discrimination task is complete! Stats: '+str(cacorrect)+'/'+str(catrials)+' CA trials correct, '+str(naclcorrect)+'/'+str(nacltrials)+' NaCl trials correct, and '+str(nopoke)+' no poke trials.')
+	print('Discrimination task is complete! Stats: '+str(succorrect)+'/'+str(suctrials)+' CA trials correct, '+str(naclcorrect)+'/'+str(nacltrials)+' NaCl trials correct, and '+str(nopoke)+' no poke trials.')
 
