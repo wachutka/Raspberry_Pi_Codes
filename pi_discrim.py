@@ -112,9 +112,7 @@ def basic_np(outport = 31, opentime = 0.011, iti = [4, 8, 12], trials = 120, out
 			while (curtime - poketime) <= delay:
 				if GPIO.input(inport) == 0:
 					poketime = time.time()
-				This trial will be NaCl/Sacc (R)
-curtime = time.time()
-
+				curtime = time.time()
 		
 	print('Basic nose poking has been completed.')
 
@@ -295,11 +293,11 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 				nopokecount += 1
 				GPIO.output(pokelights[0], 0)
 				GPIO.output(pokelights[2], 0)
-				print('Last trial had no poke. '+str(trial)+' trials completed. '+str(totalcorrect)+' of '+str(totaltrials)+' correct trials thus far.')
+				print('Last trial had no poke ('+str(nopoke)+' no poke trials). '+str(trial)+' trials completed. '+str(totalcorrect)+' of '+str(totaltrials)+' correct trials thus far.')
 				nopokepun = nopokecount * 10
 				time.sleep(nopokepun)
 			else:
-				print(str(trial)+' of '+str(trials)+' trials completed. '+str(totalcorrect)+' of '+str(totaltrials)+' correct trials thus far.')
+				print(str(totalcorrect)+' of '+str(totaltrials)+' correct trials thus far.')
 			
 			poke = 0
 			lights = 0
@@ -316,5 +314,5 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 					poketime = time.time()
 				curtime = time.time()
 
-	print('Discrimination task is complete! Stats: '+str(succorrect)+'/'+str(suctrials)+' CA trials correct, '+str(naclcorrect)+'/'+str(nacltrials)+' NaCl trials correct, and '+str(nopoke)+' no poke trials.')
+	print('Discrimination task is complete! Stats: '+str(succorrect)+'/'+str(suctrials)+' sucrose trials correct, '+str(naclcorrect)+'/'+str(nacltrials)+' NaCl trials correct, and '+str(nopoke)+' no poke trials.')
 
