@@ -117,10 +117,9 @@ def basic_np(outport = 31, opentime = 0.011, iti = [4, 8, 12], trials = 120, out
 	print('Basic nose poking has been completed.')
 
 # Discrimination task training procedure
-def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti = [12, 15, 15], trials = 120, blocksize = 15, plswitch = 120, trialdur = 15):
+def disc_train(outports = [31, 33, 37], opentimes = [0.011, 0.012, 0.01], iti = [10, 15, 15], trials = 120, blocksize = 4, plswitch = 40, trialdur = 10, blocked = 1):
 
 	GPIO.setmode(GPIO.BOARD)
-	blocked = 1			# blocked = 1 for blocked, 0 for random
 	startside = 0
 	outtime = 0.25
 	trial = 0
@@ -228,10 +227,6 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 						GPIO.output(outports[1], 1)
 						time.sleep(opentimes[1])
 						GPIO.output(outports[1], 0)
-						time.sleep(1)
-						GPIO.output(outports[1], 1)
-						time.sleep(opentimes[1])
-						GPIO.output(outports[1], 0)
 						poke = 1
 						nopokecount = 0
 						trial += 1
@@ -239,6 +234,8 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 						break
 					elif GPIO.input(inports[2]) == 0:
 						poke = 1
+						if blocked == 0:
+							trial += 1
 						nopokecount = 0
 						GPIO.output(pokelights[0], 0)
 						GPIO.output(pokelights[2], 0)
@@ -268,10 +265,6 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 						GPIO.output(outports[1], 1)
 						time.sleep(opentimes[1])
 						GPIO.output(outports[1], 0)
-						time.sleep(1)
-						GPIO.output(outports[1], 1)
-						time.sleep(opentimes[1])
-						GPIO.output(outports[1], 0)
 						poke = 1
 						nopokecount = 0
 						trial += 1
@@ -279,6 +272,8 @@ def disc_train(outports = [33, 31, 35], opentimes = [0.011, 0.011, 0.012], iti =
 						break
 					elif GPIO.input(inports[0]) == 0:
 						poke = 1
+						if blocked == 0:
+							trial += 1
 						nopokecount = 0
 						GPIO.output(pokelights[0], 0)
 						GPIO.output(pokelights[2], 0)
