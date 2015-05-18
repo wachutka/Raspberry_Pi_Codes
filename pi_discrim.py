@@ -327,6 +327,7 @@ def multi_np(outports = [31, 33, 35], inports = [11, 13, 15], pokelights = [36, 
 		GPIO.setup(i, GPIO.OUT)
 	
 	time.sleep(5)
+	starttime = time.time()
 
 	while trial <= trials:
 		for i in pokelights:
@@ -349,9 +350,15 @@ def multi_np(outports = [31, 33, 35], inports = [11, 13, 15], pokelights = [36, 
 				GPIO.output(outports[i], 1)
 				time.sleep(opentimes[i])
 				GPIO.output(outports[i], 0)
-				print('Trial '+str(trial)+' of '+str(trials)+' completed.')
+				curtime = time.time()
+				elapstime = round((curtime - starttime)/60, 2)
+				print('Trial '+str(trial)+' of '+str(trials)+' completed. '+str(elapstime)+' minutes elapsed.')
 				trial += 1
 				time.sleep(iti)
+		curtime = time.time()
+		elapstime = round((curtime - starttime)/60, 2)
+		if elapstime > 30:
+			break
 		
 	print('Nose poking preference task has been completed.')
 
