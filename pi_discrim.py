@@ -120,7 +120,7 @@ def basic_np(outport = 31, opentime = 0.011, iti = [4, 8, 12], trials = 120, out
 def disc_train(outports = [31, 33, 37], opentimes = [0.011, 0.012, 0.01], iti = [10, 15, 15], trials = 120, blocksize = 4, plswitch = 40, trialdur = 10, blocked = 1):
 
 	GPIO.setmode(GPIO.BOARD)
-	startside = 0
+	startside = 1
 	outtime = 0.25
 	trial = 0
 	bothpl = 0			# bothpl = 1 for both lights, 0 for cue light only
@@ -311,3 +311,66 @@ def disc_train(outports = [31, 33, 37], opentimes = [0.011, 0.012, 0.01], iti = 
 
 	print('Discrimination task is complete! Stats: '+str(succorrect)+'/'+str(suctrials)+' sucrose trials correct, '+str(naclcorrect)+'/'+str(nacltrials)+' NaCl trials correct, and '+str(nopoke)+' no poke trials.')
 
+
+# Multiple nose poke procedure for preference measurements 
+def multi_np(outports = [31, 33, 35], inports = [11, 13, 15], pokelights = [36, 38, 40], opentimes = [0.011, .012, .011], iti = 1, trials = 120, outtime = 0.1):
+
+	GPIO.setmode(GPIO.BOARD)
+	trial = 1
+	houselight = 18
+	for i in pokelights:
+		GPIO.setup(i, GPIO.OUT)
+	GPIO.setup(houselight, GPIO.OUT)
+	for i in inports:
+		GPIO.setup(i, GPIO.IN)
+	for i in outports:
+		GPIO.setup(i, GPIO.OUT)
+	
+	time.sleep(5)
+
+	while trial <= trials:
+		for i in pokelights:
+			GPIO.output(i, 1)
+		GPIO.output(houselight, 1)
+	
+# Check for pokes
+		for i in range(len(inports)):
+			if GPIO.input(inports[i]) == 0:
+				poketime = time.time()
+				curtime = poketime
+
+# Make rat remove nose from nose poke to receive reward
+				while (curtime - poketime) <= outtime:
+					if GPIO.input(inports[i]) == 0:
+						poketime = time.time()
+					curtime = time.time()
+
+# Stimulus delivery
+				GPIO.output(outports[i], 1)
+				time.sleep(opentimes[i])
+				GPIO.output(outports[i], 0)
+				print('Trial '+str(trial)+' of '+str(trials)+' completed.')
+				trial += 1
+				time.sleep(iti)
+		
+	print('Nose poking preference task has been completed.')
+
+# Clear all outputs from Pi
+def clearall():
+	outports = [31, 33, 35, 37]
+	inports = [11, 13, 15]
+	pokelights = [36, 38, 40]
+	houselight = 18
+	
+	for i in outports:
+		GPIO.setup(i, GPIO.OUT)
+		GPIO.output(i, 0)
+	for i in inports:
+		GPIO.setup(i, GPIO.IN, GPIO.PUD_UP)
+	for i in pokelights:
+		GPIO.setup(i, GPIO.OUT)
+		GPIO.output(i, 0)
+	GPIO.setup(houselight, GPIO.OUT)
+	GPIO.output(houselight, 0)
+
+	
