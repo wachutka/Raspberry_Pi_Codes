@@ -329,11 +329,11 @@ def multi_np(outports = [31, 33, 35], inports = [11, 13, 15], pokelights = [36, 
 	time.sleep(5)
 	starttime = time.time()
 
+	for i in pokelights:
+		GPIO.output(i, 1)
+	GPIO.output(houselight, 1)
+
 	while trial <= trials:
-		for i in pokelights:
-			GPIO.output(i, 1)
-		GPIO.output(houselight, 1)
-	
 # Check for pokes
 		for i in range(len(inports)):
 			if GPIO.input(inports[i]) == 0:
@@ -360,6 +360,9 @@ def multi_np(outports = [31, 33, 35], inports = [11, 13, 15], pokelights = [36, 
 		if elapstime > 30:
 			break
 		
+	for i in pokelights:
+		GPIO.output(i, 0)
+	GPIO.output(houselight, 0)
 	print('Nose poking preference task has been completed.')
 
 # Clear all outputs from Pi
