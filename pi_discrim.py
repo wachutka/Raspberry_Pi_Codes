@@ -336,6 +336,7 @@ def multi_np(outports = [31, 33, 35], inports = [11, 13, 15], pokelights = [36, 
 	trials = 250
 	outtime = 0.1
 	trial = 1
+	tarray = []
 	houselight = 18
 	pokecounter = [0, 0, 0]
 	for i in pokelights:
@@ -386,6 +387,71 @@ def multi_np(outports = [31, 33, 35], inports = [11, 13, 15], pokelights = [36, 
 		GPIO.output(i, 0)
 	GPIO.output(houselight, 0)
 	print('Nose poking preference task has been completed. Total Time: '+str(elapsedtime)+' mins. Poke counter: '+str(pokecounter))
+
+# Multiple nose poke procedure for preference measurements 
+def multi_rand(outports = [33, 35], inport = 13, pokelight = 38, opentimes = [0.009, .0095], iti = [3, 5]):
+
+	GPIO.setmode(GPIO.BOARD)
+	trials = 250
+	outtime = 0.1
+	trial = 1
+	houselight = 18
+	pokecounter = [0, 0, 0]
+	GPIO.setup(pokelight, GPIO.OUT)
+	GPIO.setup(houselight, GPIO.OUT)
+	GPIO.setup(inport, GPIO.IN)
+	for i in outports:
+		GPIO.setup(i, GPIO.OUT)
+
+	for i in range(trials):
+			if i % 2 == 0:
+				tarray.append(0)
+			else:
+				tarray.append(1)
+		random.shuffle(tarray)	
+	
+	time.sleep(5)
+	starttime = time.time()
+
+	for i in pokelights:
+		GPIO.output(i, 1)
+	GPIO.output(houselight, 1)
+
+	while trial <= trials:
+
+# Check for pokes
+		if GPIO.input(inport) == 0:
+			poketime = time.time()
+			curtime = poketime
+
+# Make rat remove nose from nose poke to receive reward
+			while (curtime - poketime) <= outtime:
+				if GPIO.input(inport) == 0:
+					poketime = time.time()
+				curtime = time.time()
+
+# Stimulus delivery
+			j = tarray[trial - 1]
+			GPIO.output(outports[j], 1)
+			time.sleep(opentimes[j])
+			GPIO.output(outports[j], 0)
+			pokecounter[j] += 1
+			curtime = time.time()
+			elapsedtime = round((curtime - starttime)/60, 2)
+			print('Trial '+str(trial)+' of '+str(trials)+' completed. '+str(elapsedtime)+' minutes elapsed. Poke counter: '+str(pokecounter))
+			trial += 1
+			delay = floor((random.random()*(iti[1]-iti[0]))*100)/100+iti[0]
+			time.sleep(delay)
+		curtime = time.time()
+		elapsedtime = round((curtime - starttime)/60, 2)
+		if elapsedtime > 30:
+			break
+		
+	for i in pokelights:
+		GPIO.output(i, 0)
+	GPIO.output(houselight, 0)
+	print('Nose poking preference task has been completed. Total Time: '+str(elapsedtime)+' mins. Poke counter: '+str(pokecounter))
+
 
 # Clear all outputs from Pi
 def clearall():
