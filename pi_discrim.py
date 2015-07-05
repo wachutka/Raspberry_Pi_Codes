@@ -42,7 +42,7 @@ def calibrate(outports = [31, 33, 35, 37], opentime = 0.015, repeats = 5):
 	print('Calibration procedure complete.')
 
 # Passive H2O deliveries
-def passive(outport = 31, opentime = 0.015, iti = 15, trials = 100):
+def passive(outport = 31, opentime = 0.01, iti = 15, trials = 100):
 
 	GPIO.setmode(GPIO.BOARD)
 	GPIO.setup(outport, GPIO.OUT)
@@ -59,7 +59,7 @@ def passive(outport = 31, opentime = 0.015, iti = 15, trials = 100):
 	print('Passive deliveries completed')
 
 # Basic nose poking procedure for H2O rewards
-def basic_np(outport = 31, opentime = 0.011, iti = [4, 8, 12], trials = 120, outtime = 0.15):
+def basic_np(outport = 31, opentime = 0.0125, iti = [.4, 1, 1.5], trials = 150, outtime = 0):
 
 	GPIO.setmode(GPIO.BOARD)
 	trial = 1
@@ -72,9 +72,20 @@ def basic_np(outport = 31, opentime = 0.011, iti = [4, 8, 12], trials = 120, out
 	GPIO.setup(inport, GPIO.IN)
 	GPIO.setup(outport, GPIO.OUT)
 	
+
 	time.sleep(5)
+	starttime = time.time()
 
 	while trial <= trials:
+
+# Timer to stop experiment
+		curtime = time.time()
+		elapsedtime = round((curtime - starttime)/60, 2)
+		if elapsedtime > 60:
+			GPIO.output(pokelight, 0)
+			GPIO.output(houselight, 0)
+			break
+
 		if lights == 0:
 			GPIO.output(pokelight, 1)
 			GPIO.output(houselight, 1)
@@ -117,7 +128,7 @@ def basic_np(outport = 31, opentime = 0.011, iti = [4, 8, 12], trials = 120, out
 	print('Basic nose poking has been completed.')
 
 # Discrimination task training procedure
-def disc_train(outports = [31, 33, 37], opentimes = [0.011, 0.012, 0.01], iti = [10, 15, 15], trials = 120, blocksize = 4, plswitch = 40, trialdur = 10, blocked = 1):
+def disc_train(outports = [31, 33, 35], opentimes = [0.0105, 0.025, 0.011], iti = [10, 15, 15], trials = 120, blocksize = 4, plswitch = 20, trialdur = 10, blocked = 0):
 
 	GPIO.setmode(GPIO.BOARD)
 	startside = 1
@@ -180,8 +191,14 @@ def disc_train(outports = [31, 33, 37], opentimes = [0.011, 0.012, 0.01], iti = 
 
 	print(tarray)
 	time.sleep(10)
+	starttime = time.time()
 
 	while trial < trials:
+		curtime = time.time()
+		elapsedtime = round((curtime - starttime)/60, 2)
+		if elapsedtime > 75:
+			break
+
 		if lights == 0:
 			GPIO.output(houselight, 1)
 			GPIO.output(pokelights[1], 1)
@@ -313,11 +330,14 @@ def disc_train(outports = [31, 33, 37], opentimes = [0.011, 0.012, 0.01], iti = 
 
 
 # Multiple nose poke procedure for preference measurements 
-def multi_np(outports = [31, 33, 35], inports = [11, 13, 15], pokelights = [36, 38, 40], opentimes = [0.011, .012, .011], iti = 1, trials = 120, outtime = 0.1):
+def multi_np(outports = [31, 33, 35], inports = [11, 13, 15], pokelights = [36, 38, 40], opentimes = [0.011, .012, .011], iti = [1, 2]):
 
 	GPIO.setmode(GPIO.BOARD)
+	trials = 250
+	outtime = 0.1
 	trial = 1
 	houselight = 18
+	pokecounter = [0, 0, 0]
 	for i in pokelights:
 		GPIO.setup(i, GPIO.OUT)
 	GPIO.setup(houselight, GPIO.OUT)
@@ -350,20 +370,22 @@ def multi_np(outports = [31, 33, 35], inports = [11, 13, 15], pokelights = [36, 
 				GPIO.output(outports[i], 1)
 				time.sleep(opentimes[i])
 				GPIO.output(outports[i], 0)
+				pokecounter[i] += 1
 				curtime = time.time()
-				elapstime = round((curtime - starttime)/60, 2)
-				print('Trial '+str(trial)+' of '+str(trials)+' completed. '+str(elapstime)+' minutes elapsed.')
+				elapsedtime = round((curtime - starttime)/60, 2)
+				print('Trial '+str(trial)+' of '+str(trials)+' completed. '+str(elapsedtime)+' minutes elapsed. Poke counter: '+str(pokecounter))
 				trial += 1
-				time.sleep(iti)
+				delay = floor((random.random()*(iti[1]-iti[0]))*100)/100+iti[0]
+				time.sleep(delay)
 		curtime = time.time()
-		elapstime = round((curtime - starttime)/60, 2)
-		if elapstime > 30:
+		elapsedtime = round((curtime - starttime)/60, 2)
+		if elapsedtime > 30:
 			break
 		
 	for i in pokelights:
 		GPIO.output(i, 0)
 	GPIO.output(houselight, 0)
-	print('Nose poking preference task has been completed.')
+	print('Nose poking preference task has been completed. Total Time: '+str(elapsedtime)+' mins. Poke counter: '+str(pokecounter))
 
 # Clear all outputs from Pi
 def clearall():
@@ -371,6 +393,8 @@ def clearall():
 	inports = [11, 13, 15]
 	pokelights = [36, 38, 40]
 	houselight = 18
+	lasers = [12, 22, 16]
+
 	
 	for i in outports:
 		GPIO.setup(i, GPIO.OUT)
@@ -378,6 +402,9 @@ def clearall():
 	for i in inports:
 		GPIO.setup(i, GPIO.IN, GPIO.PUD_UP)
 	for i in pokelights:
+		GPIO.setup(i, GPIO.OUT)
+		GPIO.output(i, 0)
+	for i in lasers:
 		GPIO.setup(i, GPIO.OUT)
 		GPIO.output(i, 0)
 	GPIO.setup(houselight, GPIO.OUT)
