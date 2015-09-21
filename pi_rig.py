@@ -142,10 +142,10 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 	lights = 0
 	tarray = []
 
-	succorrect = 0
-	naclcorrect = 0
-	suctrials = 0
-	nacltrials = 0
+	bluecorrect = 0
+	greencorrect = 0
+	bluetrials = 0
+	greentrials = 0
 	nopoke = 0
 	nopokecount = 0
 	nopokepun = 10
@@ -185,7 +185,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 				if startside == 0:
 					tarray.append(1)
 				else:
-					tarray.append(0)		
+					tarray.append(0)	
 	else:
 		for i in range(trials):
 			if i % 2 == 0:
@@ -201,7 +201,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 	while trial < trials:
 		curtime = time.time()
 		elapsedtime = round((curtime - starttime)/60, 2)
-		if elapsedtime > 75:
+		if elapsedtime > 90:
 			break
 
 		if lights == 0:
@@ -210,9 +210,9 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 			if trial > plswitch:
 				bothpl = 1
 			if tarray[trial] == 0:
-				print('This trial will be left side (Blue)')
+				print('This trial will be right side (Blue). '+str(elapsedtime)+' mins elapsed.')
 			else:
-				print('This trial will be right side (Green)')
+				print('This trial will be left side (Green). '+str(elapsedtime)+' mins elapsed.')
 			lights = 1	
 
 # Check for pokes
@@ -228,7 +228,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 			
 # Deliver cue taste and manipulate cue lights (depends on setting for bothpl)
 			if tarray[trial] == 0:
-				suctrials += 1
+				bluetrials += 1
 				GPIO.output(outports[0], 1)
 				GPIO.output(intaninputs[0], 1)
 				time.sleep(opentimes[0])
@@ -254,7 +254,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 						poke = 1
 						nopokecount = 0
 						trial += 1
-						succorrect += 1
+						bluecorrect += 1
 						break
 					elif GPIO.input(inports[2]) == 0:
 						poke = 1
@@ -268,12 +268,13 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 					curtime = time.time()
 # Deliver cue taste and manipulate cue lights (depends on setting for bothpl)	
 			else:
-				nacltrials += 1
-				GPIO.output(outports[2], 1)
-				GPIO.output(intaninputs[2], 1)
-				time.sleep(opentimes[2])
-				GPIO.output(outports[2], 0)
-				GPIO.output(intaninputs[0], 0)
+				greentrials += 1
+				j = random.randint(2,3)		# Random choice for 'other' taste
+				GPIO.output(outports[j], 1)
+				GPIO.output(intaninputs[j], 1)
+				time.sleep(opentimes[j])
+				GPIO.output(outports[j], 0)
+				GPIO.output(intaninputs[j], 0)
 				GPIO.output(pokelights[1], 0)
 				GPIO.output(houselight, 0)
 				if bothpl == 0:
@@ -281,6 +282,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 				else:
 					GPIO.output(pokelights[0], 1)
 					GPIO.output(pokelights[2], 1)
+
 # Wait for response poke and provide reward or timeout punishment
 				timestart = time.time()
 				curtime = timestart
@@ -296,7 +298,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 						poke = 1
 						nopokecount = 0
 						trial += 1
-						naclcorrect += 1
+						greencorrect += 1
 						break
 					elif GPIO.input(inports[0]) == 0:
 						poke = 1
@@ -308,8 +310,8 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 						time.sleep(10)
 						break
 					curtime = time.time()
-			totalcorrect = succorrect + naclcorrect
-			totaltrials = suctrials + nacltrials
+			totalcorrect = bluecorrect + greencorrect
+			totaltrials = bluetrials + greentrials
 
 			if poke == 0:
 				nopoke += 1
@@ -337,7 +339,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 					poketime = time.time()
 				curtime = time.time()
 
-	print('Discrimination task is complete! Stats: '+str(succorrect)+'/'+str(suctrials)+' sucrose trials correct, '+str(naclcorrect)+'/'+str(nacltrials)+' NaCl trials correct, and '+str(nopoke)+' no poke trials.')
+	print('Discrimination task is complete! Stats: '+str(bluecorrect)+'/'+str(bluetrials)+' sucrose trials correct, '+str(greencorrect)+'/'+str(greentrials)+' NaCl trials correct, and '+str(nopoke)+' no poke trials.')
 
 
 # Multiple nose poke procedure for preference measurements 
