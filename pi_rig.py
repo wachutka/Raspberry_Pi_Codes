@@ -144,9 +144,9 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 	tarray = []
 
 	bluecorrect = 0
-	greencorrect = 0
+	greencorrect = [0, 0, 0]
 	bluetrials = 0
-	greentrials = 0
+	greentrials = [0, 0, 0]
 	nopoke = 0
 	nopokecount = 0
 	nopokepun = 10
@@ -269,8 +269,8 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 					curtime = time.time()
 # Deliver cue taste and manipulate cue lights (depends on setting for bothpl)	
 			else:
-				greentrials += 1
 				j = random.randint(1,3)		# Random choice for 'other' taste
+				greentrials(j-1) += 1
 				GPIO.output(outports[j], 1)
 				GPIO.output(intaninputs[j], 1)
 				time.sleep(opentimes[j])
@@ -299,7 +299,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 						poke = 1
 						nopokecount = 0
 						trial += 1
-						greencorrect += 1
+						greencorrect(j-1) += 1
 						break
 					elif GPIO.input(inports[0]) == 0:
 						poke = 1
@@ -311,8 +311,8 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 						time.sleep(10)
 						break
 					curtime = time.time()
-			totalcorrect = bluecorrect + greencorrect
-			totaltrials = bluetrials + greentrials
+			totalcorrect = bluecorrect + greencorrect(0) + greencorrect(1) + greencorrect(2)
+			totaltrials = bluetrials + greentrials(0) + greentrials(1) + greentrials (2)
 
 			if poke == 0:
 				nopoke += 1
@@ -340,7 +340,12 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 					poketime = time.time()
 				curtime = time.time()
 
-	print('Discrimination task is complete! Stats: '+str(bluecorrect)+'/'+str(bluetrials)+' sucrose trials correct, '+str(greencorrect)+'/'+str(greentrials)+' NaCl trials correct, and '+str(nopoke)+' no poke trials.')
+# Turn off all lights and end procedure 
+	GPIO.output(houselight, 0)
+	for i in pokelights:
+		GPIO.output(i, 0)
+
+	print('Discrimination task is complete! Stats: '+str(bluecorrect)+'/'+str(bluetrials)+' CA trials correct, '+str(greencorrect(0))+'/'+str(greentrials(0))+' Suc trials correct, '+str(greencorrect(1))+'/'+str(greentrials(1))+' NaCl trials correct, '+str(greencorrect(2))+'/'+str(greentrials(2))+' Qui trials correct, and '+str(nopoke)+' no poke trials.')
 
 
 # Multiple nose poke procedure for preference measurements 
