@@ -37,7 +37,7 @@ def calibrate(outports = [31, 33, 35, 37], opentime = 0.015, repeats = 5):
 		time.sleep(opentime)
 		for i in outports:
 			GPIO.output(i, 0)
-		time.sleep(3)
+		time.sleep(4)
 
 	print('Calibration procedure complete.')
 
@@ -120,6 +120,7 @@ def basic_np(outport = 31, intaninput = 5, opentime = 0.0125, iti = [.4, 1, 1.5]
 				delay = floor((random.random()*(iti[1]-iti[0]))*100)/100+iti[0]
 			else:
 				delay = floor((random.random()*(iti[2]-iti[0]))*100)/100+iti[0]
+	
 			poketime = time.time()
 			curtime = poketime
 
@@ -134,7 +135,7 @@ def basic_np(outport = 31, intaninput = 5, opentime = 0.0125, iti = [.4, 1, 1.5]
 def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01], iti = [8, 12, 14], trials = 200, blocksize = 40, plswitch = 200, trialdur = 30, blocked = 1):
 
 	GPIO.setmode(GPIO.BOARD)
-	startside = 1
+	startside = 0
 	outtime = 0.25
 	trial = 0
 	bothpl = 0			# bothpl = 1 for both lights, 0 for cue light only
@@ -210,9 +211,9 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 			if trial > plswitch:
 				bothpl = 1
 			if tarray[trial] == 0:
-				print('This trial will be right side (Blue). '+str(elapsedtime)+' mins elapsed.')
+				print('This trial will be LEFT side (G). '+str(elapsedtime)+' mins elapsed.')
 			else:
-				print('This trial will be left side (Green). '+str(elapsedtime)+' mins elapsed.')
+				print('This trial will be RIGHT side (B). '+str(elapsedtime)+' mins elapsed.')
 			lights = 1	
 
 # Check for pokes
@@ -269,7 +270,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 # Deliver cue taste and manipulate cue lights (depends on setting for bothpl)	
 			else:
 				greentrials += 1
-				j = random.randint(2,3)		# Random choice for 'other' taste
+				j = random.randint(1,3)		# Random choice for 'other' taste
 				GPIO.output(outports[j], 1)
 				GPIO.output(intaninputs[j], 1)
 				time.sleep(opentimes[j])
@@ -318,7 +319,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 				nopokecount += 1
 				GPIO.output(pokelights[0], 0)
 				GPIO.output(pokelights[2], 0)
-				print('Last trial had no poke ('+str(nopoke)+' no poke trials). '+str(trial)+' trials completed. '+str(totalcorrect)+' of '+str(totaltrials)+' correct trials thus far.')
+				print('Last trial had no poke ('+str(nopoke)+' no poke trials). '+str(totalcorrect)+' of '+str(totaltrials)+' correct trials thus far.')
 				nopokepun = nopokecount * 10
 				time.sleep(nopokepun)
 			else:
