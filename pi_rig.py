@@ -67,6 +67,8 @@ def basic_np(outport = 31, intaninput = 5, opentime = 0.0125, iti = [.4, 1, 1.5]
 	pokelight = 38
 	houselight = 18
 	lights = 0
+	maxtime = 60
+
 	GPIO.setup(pokelight, GPIO.OUT)
 	GPIO.setup(houselight, GPIO.OUT)
 	GPIO.setup(inport, GPIO.IN)
@@ -82,7 +84,7 @@ def basic_np(outport = 31, intaninput = 5, opentime = 0.0125, iti = [.4, 1, 1.5]
 # Timer to stop experiment
 		curtime = time.time()
 		elapsedtime = round((curtime - starttime)/60, 2)
-		if elapsedtime > 60:
+		if elapsedtime > maxtime:
 			GPIO.output(pokelight, 0)
 			GPIO.output(houselight, 0)
 			break
@@ -132,7 +134,7 @@ def basic_np(outport = 31, intaninput = 5, opentime = 0.0125, iti = [.4, 1, 1.5]
 	print('Basic nose poking has been completed.')
 
 # Discrimination task training procedure
-def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01], iti = [8, 12, 14], trials = 200, blocksize = 40, plswitch = 200, trialdur = 30, blocked = 1):
+def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01], iti = [8, 12, 12], trials = 200, blocksize = 25, plswitch = 200, trialdur = 30, blocked = 1):
 
 	GPIO.setmode(GPIO.BOARD)
 	startside = 0
@@ -142,11 +144,12 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 	blcounter = 1
 	lights = 0
 	tarray = []
+	maxtime = 90
 
-	bluecorrect = 0
-	greencorrect = [0, 0, 0]
-	bluetrials = 0
-	greentrials = [0, 0, 0]
+	bluecorrect = [0, 0]
+	greencorrect = [0, 0]
+	bluetrials = [0, 0]
+	greentrials = [0, 0]
 	nopoke = 0
 	nopokecount = 0
 	nopokepun = 10
@@ -202,7 +205,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 	while trial < trials:
 		curtime = time.time()
 		elapsedtime = round((curtime - starttime)/60, 2)
-		if elapsedtime > 90:
+		if elapsedtime > maxtime:
 			break
 
 		if lights == 0:
@@ -229,7 +232,8 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 			
 # Deliver cue taste and manipulate cue lights (depends on setting for bothpl)
 			if tarray[trial] == 0:
-				bluetrials += 1
+				j = random.randint(1,2)		# Random choice for 'other' taste
+				bluetrials[j-1] += 1
 				GPIO.output(outports[0], 1)
 				GPIO.output(intaninputs[0], 1)
 				time.sleep(opentimes[0])
@@ -255,7 +259,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 						poke = 1
 						nopokecount = 0
 						trial += 1
-						bluecorrect += 1
+						bluecorrect[j-1] += 1
 						break
 					elif GPIO.input(inports[2]) == 0:
 						poke = 1
@@ -269,13 +273,17 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 					curtime = time.time()
 # Deliver cue taste and manipulate cue lights (depends on setting for bothpl)	
 			else:
-				j = random.randint(1,3)		# Random choice for 'other' taste
-				greentrials(j-1) += 1
-				GPIO.output(outports[j], 1)
-				GPIO.output(intaninputs[j], 1)
-				time.sleep(opentimes[j])
-				GPIO.output(outports[j], 0)
-				GPIO.output(intaninputs[j], 0)
+				j = random.randint(0,1)		# Random choice for 'other' taste
+				greentrials[j] += 1
+				if j == 1:
+					k = 3
+				else:
+					k = 0
+				GPIO.output(outports[k], 1)
+				GPIO.output(intaninputs[k], 1)
+				time.sleep(opentimes[k])
+				GPIO.output(outports[k], 0)
+				GPIO.output(intaninputs[k], 0)
 				GPIO.output(pokelights[1], 0)
 				GPIO.output(houselight, 0)
 				if bothpl == 0:
@@ -299,7 +307,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 						poke = 1
 						nopokecount = 0
 						trial += 1
-						greencorrect(j-1) += 1
+						greencorrect[j] += 1
 						break
 					elif GPIO.input(inports[0]) == 0:
 						poke = 1
@@ -311,8 +319,8 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 						time.sleep(10)
 						break
 					curtime = time.time()
-			totalcorrect = bluecorrect + greencorrect(0) + greencorrect(1) + greencorrect(2)
-			totaltrials = bluetrials + greentrials(0) + greentrials(1) + greentrials (2)
+			totalcorrect = bluecorrect[0] + bluecorrect[1] + greencorrect[0] + greencorrect[1]
+			totaltrials = bluetrials[0] + bluetrials[1] + greentrials[0] + greentrials[1]
 
 			if poke == 0:
 				nopoke += 1
@@ -345,7 +353,7 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 	for i in pokelights:
 		GPIO.output(i, 0)
 
-	print('Discrimination task is complete! Stats: '+str(bluecorrect)+'/'+str(bluetrials)+' CA trials correct, '+str(greencorrect(0))+'/'+str(greentrials(0))+' Suc trials correct, '+str(greencorrect(1))+'/'+str(greentrials(1))+' NaCl trials correct, '+str(greencorrect(2))+'/'+str(greentrials(2))+' Qui trials correct, and '+str(nopoke)+' no poke trials.')
+	print('Discrimination task is complete! Stats: '+str(bluecorrect[0])+'/'+str(bluetrials[0])+' Suc trials correct, '+str(bluecorrect[1])+'/'+str(bluetrials[1])+' Sacc trials correct, '+str(greencorrect[0])+'/'+str(greentrials[0])+' CA trials correct, '+str(greencorrect[1])+'/'+str(greentrials[1])+' Qui trials correct, and '+str(nopoke)+' no poke trials.')
 
 
 # Multiple nose poke procedure for preference measurements 
