@@ -42,7 +42,7 @@ def calibrate(outports = [31, 33, 35, 37], opentime = 0.015, repeats = 5):
 	print('Calibration procedure complete.')
 
 # Passive H2O deliveries
-def passive(outport = 31, opentime = 0.01, iti = 15, trials = 100):
+def passive(outport = 31, opentime = 0.01, iti = 15, trials = 150):
 
 	GPIO.setmode(GPIO.BOARD)
 	GPIO.setup(outport, GPIO.OUT)
@@ -134,10 +134,10 @@ def basic_np(outport = 31, intaninput = 5, opentime = 0.0125, iti = [.4, 1, 1.5]
 	print('Basic nose poking has been completed.')
 
 # Discrimination task training procedure
-def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01], iti = [8, 12, 12], trials = 200, blocksize = 25, plswitch = 200, trialdur = 30, blocked = 1):
+def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01, .03], iti = [6, 12, 12], trials = 200, blocksize = 25, trialdur = 20, blocked = 1, plswitch = 200, switchlights = 15):
 
 	GPIO.setmode(GPIO.BOARD)
-	startside = 0
+	startside = random.randint(0,1)
 	outtime = 0.25
 	trial = 0
 	bothpl = 0			# bothpl = 1 for both lights, 0 for cue light only
@@ -211,8 +211,16 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 		if lights == 0:
 			GPIO.output(houselight, 1)
 			GPIO.output(pokelights[1], 1)
-			if trial > plswitch:
-				bothpl = 1
+			if blocked == 1:
+				if trial % blocksize > (switchlights-1) or trial >= plswitch:
+					bothpl = 1
+				else:
+					bothpl = 0
+			else:
+				if trial >= plswitch:
+					bothpl = 1
+				else:
+					bothpl = 0
 			if tarray[trial] == 0:
 				print('This trial will be LEFT side (G). '+str(elapsedtime)+' mins elapsed.')
 			else:
@@ -232,12 +240,14 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 			
 # Deliver cue taste and manipulate cue lights (depends on setting for bothpl)
 			if tarray[trial] == 0:
-				j = random.randint(1,2)		# Random choice for 'other' taste
+				j = 2 #random.randint(1,3)		# Random choice for 'other' taste
+				if j == 3:
+					j = 2
 				bluetrials[j-1] += 1
-				GPIO.output(outports[0], 1)
-				GPIO.output(intaninputs[0], 1)
-				time.sleep(opentimes[0])
-				GPIO.output(outports[0], 0)
+				GPIO.output(outports[j], 1)
+				GPIO.output(intaninputs[j], 1)
+				time.sleep(opentimes[j])
+				GPIO.output(outports[j], 0)
 				GPIO.output(intaninputs[0], 0)
 				GPIO.output(pokelights[1], 0)
 				GPIO.output(houselight, 0)
@@ -254,7 +264,8 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 						GPIO.output(pokelights[0], 0)
 						GPIO.output(pokelights[2], 0)
 						GPIO.output(outports[1], 1)
-						time.sleep(opentimes[1])
+						GPIO.output(intaninputs[1], 1)
+						time.sleep(opentimes[4])
 						GPIO.output(outports[1], 0)
 						poke = 1
 						nopokecount = 0
@@ -273,9 +284,9 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 					curtime = time.time()
 # Deliver cue taste and manipulate cue lights (depends on setting for bothpl)	
 			else:
-				j = random.randint(0,1)		# Random choice for 'other' taste
-				greentrials[j] += 1
-				if j == 1:
+				k = 0 #random.randint(0,1)		# Random choice for 'other' taste
+				greentrials[k] += 1
+				if k == 1:
 					k = 3
 				else:
 					k = 0
@@ -301,13 +312,13 @@ def disc_train(outports = [31, 33, 35, 37], opentimes = [0.01, 0.01, 0.01, 0.01]
 						GPIO.output(pokelights[2], 0)
 						GPIO.output(outports[1], 1)
 						GPIO.output(intaninputs[1], 1)
-						time.sleep(opentimes[1])
+						time.sleep(opentimes[4])
 						GPIO.output(outports[1], 0)
 						GPIO.output(intaninputs[1], 0)
 						poke = 1
 						nopokecount = 0
 						trial += 1
-						greencorrect[j] += 1
+						greencorrect[k] += 1
 						break
 					elif GPIO.input(inports[0]) == 0:
 						poke = 1
