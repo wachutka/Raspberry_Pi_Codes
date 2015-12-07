@@ -11,7 +11,7 @@ GPIO.setmode(GPIO.BOARD)
 
 
 # Discrimination task training procedure
-def disc_id(outports = [31, 33, 35, 37], opentimes = [0.055, 0.04, 0.04, 0.01, .13], iti = [8, 12, 12], trials = 200, blocksize = 5, trialdur = 10, blocked = 1, plswitch = 200, switchlights = 1):
+def disc_id(outports = [31, 33, 35, 37], opentimes = [0.05, 0.01, 0.07, 0.011, .175], iti = [8, 12, 12], trials = 200, blocksize = 10, trialdur = 10, blocked = 1, plswitch = 100, switchlights = 5):
 
 	GPIO.setmode(GPIO.BOARD)
 	startside = random.randint(0,1)
@@ -21,7 +21,7 @@ def disc_id(outports = [31, 33, 35, 37], opentimes = [0.055, 0.04, 0.04, 0.01, .
 	blcounter = 1
 	lights = 0
 	tarray = []
-	maxtime = 90
+	maxtime = 75
 
 	bluecorrect = [0, 0, 0]
 	greencorrect = [0]
@@ -128,7 +128,7 @@ def disc_id(outports = [31, 33, 35, 37], opentimes = [0.055, 0.04, 0.04, 0.01, .
 				GPIO.output(intaninputs[j2], 1)
 				time.sleep(opentimes[j2])
 				GPIO.output(outports[j2], 0)
-				GPIO.output(intaninputs[0], 0)
+				GPIO.output(intaninputs[j2], 0)
 				GPIO.output(pokelights[1], 0)
 				GPIO.output(houselight, 0)
 				if bothpl == 0:
@@ -147,6 +147,7 @@ def disc_id(outports = [31, 33, 35, 37], opentimes = [0.055, 0.04, 0.04, 0.01, .
 						GPIO.output(intaninputs[1], 1)
 						time.sleep(opentimes[4])
 						GPIO.output(outports[1], 0)
+						GPIO.output(intaninputs[1], 0)
 						poke = 1
 						nopokecount = 0
 						trial += 1
