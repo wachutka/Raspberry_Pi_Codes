@@ -59,7 +59,7 @@ def passive(outport = 31, opentime = 0.01, iti = 15, trials = 150):
 	print('Passive deliveries completed')
 
 # Basic nose poking procedure for H2O rewards
-def basic_np(outport = 31, intaninput = 5, opentime = 0.0125, iti = [.4, 1, 1.5], trials = 150, outtime = 0):
+def basic_np(outport = 31, intaninput = 5, opentime = 0.012, iti = [.4, 1, 2], trials = 200, outtime = 0):
 
 	GPIO.setmode(GPIO.BOARD)
 	trial = 1
