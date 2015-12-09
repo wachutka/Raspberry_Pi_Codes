@@ -279,6 +279,7 @@ def disc_id(outports = [31, 33, 35, 37], opentimes = [0.05, 0.01, 0.07, 0.011, .
 		GPIO.output(i, 0)
 	
         d = datetime.date.today()
+        bold = xlwt.easyxf('font: bold 1')
 
 #Check for current data log
         if os.path.isfile('joe_data/'+str(rat)):
