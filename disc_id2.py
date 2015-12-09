@@ -20,7 +20,6 @@ GPIO.setmode(GPIO.BOARD)
 # Discrimination task training procedure
 def disc_id(outports = [31, 33, 35, 37], opentimes = [0.05, 0.01, 0.07, 0.011, .175], iti = [8, 12, 12], trials = 200, blocksize = 10, trialdur = 10, blocked = 1, plswitch = 100, switchlights = 5, rat = 'JW43'):
 
-	GPIO.setmode(GPIO.BOARD)
 	startside = random.randint(0,1)
 	outtime = 0.25
 	trial = 0
@@ -290,7 +289,7 @@ def disc_id(outports = [31, 33, 35, 37], opentimes = [0.05, 0.01, 0.07, 0.011, .
         sheet1.write(0, 0, 'Taste')
         sheet1.write(0, 1, 'Side')
         sheet1.write(0, 2, 'Correct')
-        sheet1.write(0, 2, 'Latency')
+        sheet1.write(0, 3, 'Latency')
 	
 #Write behavioral data to file
         for i in range(len(taste)):
