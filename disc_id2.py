@@ -20,6 +20,7 @@ GPIO.setmode(GPIO.BOARD)
 # Discrimination task training procedure
 def disc_id(outports = [31, 33, 35, 37], opentimes = [0.05, 0.01, 0.07, 0.011, .175], iti = [8, 12, 12], trials = 200, blocksize = 10, trialdur = 10, blocked = 1, plswitch = 100, switchlights = 5, rat = 'JW43'):
 
+	GPIO.setmode(GPIO.BOARD)
 	startside = random.randint(0,1)
 	outtime = 0.25
 	trial = 0
@@ -276,35 +277,43 @@ def disc_id(outports = [31, 33, 35, 37], opentimes = [0.05, 0.01, 0.07, 0.011, .
 	for i in pokelights:
 		GPIO.output(i, 0)
 	
-#Check for and create log file
-	d = datetime.date.today()
+        d = datetime.date.today()
 
+#Check for current data log
         if os.path.isfile('joe_data/'+str(rat)):
-            book = xlrd.open_workbook('joe_data/'+str(rat))
+            dataold = xlrd.open_workbook('joe_data/'+str(rat),formatting_info=True)
+            book = copy(dataold)
+
     
         else:
             book = xlwt.Workbook()
     
+#Create sheet and write file headings/structure
         sheet1 = book.add_sheet(str('%02d' % d.year)+str('%02d' % d.month)+str('%02d' % d.day))
-        sheet1.write(0, 0, 'Taste')
-        sheet1.write(0, 1, 'Side')
-        sheet1.write(0, 2, 'Correct')
-        sheet1.write(0, 3, 'Latency')
-	
+        sheet1.write(0, 0, 'Taste', bold)
+        sheet1.write(0, 1, 'Side', bold)
+        sheet1.write(0, 2, 'Correct', bold)
+        sheet1.write(0, 3, 'Latency (ms)', bold)
+        sheet1.write(0, 5, 'Total', bold)
+        sheet1.write(0, 6, 'Correct', bold)
+        sheet1.write(1, 5, xlwt.Formula('COUNT(C2:C300)'))
+        sheet1.write(1, 6, xlwt.Formula('SUM(C2:C300)'))
+
 #Write behavioral data to file
         for i in range(len(taste)):
             sheet1.write(i+1, 0, taste[i])
-
+            
         for i in range(len(pokeside)):
             sheet1.write(i+1, 1, pokeside[i])
-    
+            
         for i in range(len(correct)):
             sheet1.write(i+1, 2, correct[i])
     
         for i in range(len(pokelatency)):
+            pokelatency[i] = int(round(pokelatency[i]*10))
             sheet1.write(i+1, 3, pokelatency[i])
 
-
+#Save data file
         book.save('joe_data/'+str(rat))
         
 	print('Discrimination task is complete! Stats: '+str(bluecorrect[0])+'/'+str(bluetrials[0])+' Sacc trials correct, '+str(bluecorrect[1])+'/'+str(bluetrials[1])+' QHCl trials correct, '+str(greencorrect[0])+'/'+str(greentrials[0])+' CA trials correct, '+str(bluecorrect[2])+'/'+str(bluetrials[2])+' Suc trials correct, and '+str(nopoke)+' no poke trials.')
