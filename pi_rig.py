@@ -8,6 +8,7 @@ import RPi.GPIO as GPIO
 # For data logging
 import xlwt
 import xlrd
+from xlutils.copy import copy
 import datetime
 import os.path
 
@@ -141,24 +142,24 @@ def basic_np(outport = 31, intaninput = 5, opentime = 0.012, iti = [.4, 1, 2], t
 
 
 # Multiple nose poke procedure for preference measurements 
-def multi_np(outports = [31, 35], switch = 0, inports = [11, 15], pokelights = [36, 40], opentimes = [0.011, .011], iti = [1, 1]):
+def multi_np(outports = [31, 37], outports2 = [31, 33], switch = 0, inports = [11, 15], pokelights = [36, 40], opentimes = [0.011, .011], iti = [1, 2], rat = 'JW41'):
 
 	GPIO.setmode(GPIO.BOARD)
 	outtime = 0.1
 	trial = 1
 	block = 1
 	maxtime = 15
+	intermission = 5
 	pokeside = []
 	houselight = 18
 	pokecounter = [0, 0]
 	intaninputs = [5, 7]
-	outports2 = [31, 33]
-	b1pokes = []
-	b1taste = []
-	b1ports = []
-	taste = []
+	b1pokes = [0, 0]
+	b1taste = ['a', 'b']
+	b1ports = [0, 0]
+	taste = ['a', 'b']
 	
-	if random.randint(0, 1) == 1
+	if random.randint(0, 1) == 1:
 	   inports[0], inports[1] = inports[1], inports[0]
 	
 	for i in pokelights:
@@ -171,7 +172,7 @@ def multi_np(outports = [31, 35], switch = 0, inports = [11, 15], pokelights = [
 		GPIO.setup(i, GPIO.OUT)
 	GPIO.setup(houselight, GPIO.OUT)
 	
-	time.sleep(5)
+	time.sleep(15)
 
 	for i in pokelights:
 		GPIO.output(i, 1)
@@ -181,51 +182,65 @@ def multi_np(outports = [31, 35], switch = 0, inports = [11, 15], pokelights = [
 	curtime = time.time()
 	elapsedtime = round((curtime - starttime)/60, 2)
 
-#Start experiment
+	#Start experiment
         while block <= 2:
-   	    while elapsedtime <= maxtime:
+		while elapsedtime <= maxtime:
     	       
-# Check for pokes
-                for i in range(len(inports)):
-  		if GPIO.input(inports[i]) == 0:
- 			poketime = time.time()
- 			curtime = poketime
-    
-# Make rat remove nose from nose poke to receive reward
- 			while (curtime - poketime) <= outtime:
-    				if GPIO.input(inports[i]) == 0:
-   					poketime = time.time()
-    				curtime = time.time()
-    
-# Stimulus delivery
- 			GPIO.output(outports[i], 1)
- 			GPIO.output(intaninputs[i], 1)
- 			time.sleep(opentimes[i])
- 			GPIO.output(outports[i], 0)
- 			GPIO.output(intaninputs[i], 0)
- 			pokecounter[i] += 1
- 			
- 			print('Trial '+str(trial)+' of '+str(trials)+' completed. '+str(elapsedtime)+' minutes elapsed. Poke counter: '+str(pokecounter))
- 			trial += 1
- 			delay = floor((random.random()*(iti[1]-iti[0]))*100)/100+iti[0]
- 			time.sleep(delay)
-   	        curtime = time.time()
-   	        elapsedtime = round((curtime - starttime)/60, 2)
-            if block == 1:
-                GPIO.output(houselight, 0)
-	        for i in pokelights:
-	           GPIO.output(i, 0)
-	        b1pokes = pokecounter
-	        blports = outports
-	        pokecounter = []  
-	        if switch = 1:
-	           outports = outports2
-	        if random.randint(0, 1) == 1
-	           inports[0], inports[1] = inports[1], inports[0]
-	        block += 1
-	        if block == 2:
-	           time.sleep(300)
+			# Check for pokes
+		        for i in range(len(inports)):
+	  			if GPIO.input(inports[i]) == 0:
+	 				poketime = time.time()
+	 				curtime = poketime
+	    
+					# Make rat remove nose from nose poke to receive reward
+		 			while (curtime - poketime) <= outtime:
+		    				if GPIO.input(inports[i]) == 0:
+		   					poketime = time.time()
+		    				curtime = time.time()
+		    
+					# Stimulus delivery
+		 			GPIO.output(outports[i], 1)
+		 			GPIO.output(intaninputs[i], 1)
+		 			time.sleep(opentimes[i])
+		 			GPIO.output(outports[i], 0)
+		 			GPIO.output(intaninputs[i], 0)
+		 			pokecounter[i] += 1
+		 			
+		 			print('Trial '+str(trial)+' completed. '+str(elapsedtime)+' minutes elapsed. Poke counter: '+str(pokecounter))
+		 			trial += 1
+		 			delay = floor((random.random()*(iti[1]-iti[0]))*100)/100+iti[0]
+		 			time.sleep(delay)
+	   	        curtime = time.time()
+	   	        elapsedtime = round((curtime - starttime)/60, 2)
+
+		if block == 1:
+		        GPIO.output(houselight, 0)
+			for i in pokelights:
+			   GPIO.output(i, 0)
+			b1pokes = pokecounter
+			b1ports = outports
+			pokecounter = [0, 0]  
+			if switch == 1:
+			   outports = outports2
+			if random.randint(0, 1) == 1:
+			   inports[0], inports[1] = inports[1], inports[0]
+			block += 1
+			time.sleep(intermission * 60)
+			starttime = time.time()
+			curtime = time.time()
+	   	        elapsedtime = round((curtime - starttime)/60, 2)
+			for i in pokelights:
+				GPIO.output(i, 1)
+				GPIO.output(houselight, 1)
+		elif block == 2:
+			GPIO.output(houselight, 0)
+			for i in pokelights:
+				GPIO.output(i, 0)
+			block += 1
 	 	
+	d = datetime.date.today()
+        bold = xlwt.easyxf('font: bold 1')
+
 #Check for current data log
         if os.path.isfile('joe_data/'+str(rat)):
             dataold = xlrd.open_workbook('joe_data/'+str(rat),formatting_info=True)
@@ -242,20 +257,20 @@ def multi_np(outports = [31, 35], switch = 0, inports = [11, 15], pokelights = [
         sheet1.write(0, 4, 'Taste 2 Block 2', bold)
 
 
-        for i in b1ports:
+        for i in range(len(b1ports)):
             if b1ports[i] == 31:
                 b1taste[i] = 'H2O'
             elif b1ports[i] == 33:
                 b1taste[i] = 'Sucrose'
-            elif b1ports[i] == 35:
+            elif b1ports[i] >= 35:
                 b1taste[i] = 'NaCl'
                 
-        for i in outports:
+        for i in range(len(outports)):
             if outports[i] == 31:
                 taste[i] = 'H2O'
             elif outports[i] == 33:
                 taste[i] = 'Sucrose'
-            elif outports[i] == 35:
+            elif outports[i] >= 35:
                 taste[i] = 'NaCl'
                 
 #Write behavioral data to file
@@ -265,15 +280,15 @@ def multi_np(outports = [31, 35], switch = 0, inports = [11, 15], pokelights = [
             sheet1.write(2, i, b1pokes[i])
         
         for i in range(len(taste)):
-            sheet1.write(1, i+2, taste[i])
+            sheet1.write(1, i+3, taste[i])
         for i in range(len(pokecounter)):
-            sheet1.write(2, i+2, pokecounter[i])
+            sheet1.write(2, i+3, pokecounter[i])
 
 
 #Save data file
         book.save('joe_data/'+str(rat))
         
-	print('Nose poking preference task has been completed. Total Time: '+str(elapsedtime)+' mins. Poke counter: '+str(pokecounter))
+	print('Nose poking preference task has been completed.')
 
 
 
