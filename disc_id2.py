@@ -19,7 +19,7 @@ GPIO.setmode(GPIO.BOARD)
 
 
 # Discrimination task training procedure
-def disc_id(outports = [31, 33, 35, 37], opentimes = [0.05, 0.01, 0.07, 0.011, .175], iti = [8, 12, 12], trials = 200, blocksize = 10, trialdur = 10, blocked = 1, plswitch = 100, switchlights = 5, rat = 'JW43'):
+def disc_id(outports = [31, 33, 35, 37], opentimes = [0.05, 0.01, 0.07, 0.011, .175], iti = [8, 12, 12], trials = 200, blocksize = 5, trialdur = 10, blocked = 1, plswitch = 20, switchlights = 2, rat = 'JW43'):
 
 	GPIO.setmode(GPIO.BOARD)
 	startside = random.randint(0,1)
@@ -290,6 +290,7 @@ def disc_id(outports = [31, 33, 35, 37], opentimes = [0.05, 0.01, 0.07, 0.011, .
         else:
             book = xlwt.Workbook()
     
+
 #Create sheet and write file headings/structure
         sheet1 = book.add_sheet(str('%02d' % d.year)+str('%02d' % d.month)+str('%02d' % d.day))
         sheet1.write(0, 0, 'Taste', bold)
@@ -312,7 +313,7 @@ def disc_id(outports = [31, 33, 35, 37], opentimes = [0.05, 0.01, 0.07, 0.011, .
             sheet1.write(i+1, 2, correct[i])
     
         for i in range(len(pokelatency)):
-            pokelatency[i] = int(round(pokelatency[i]*10))
+            pokelatency[i] = int(round(pokelatency[i]*1000))
             sheet1.write(i+1, 3, pokelatency[i])
 
 #Save data file
