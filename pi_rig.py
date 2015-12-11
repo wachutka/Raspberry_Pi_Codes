@@ -152,12 +152,14 @@ def multi_np(outports = [31, 37], outports2 = [31, 33], switch = 0, inports = [1
 	intermission = 5
 	pokeside = []
 	houselight = 18
-	pokecounter = [0, 0]
 	intaninputs = [5, 7]
+	pokecounter = [0, 0]
 	b1pokes = [0, 0]
 	b1taste = ['a', 'b']
 	b1ports = [0, 0]
 	taste = ['a', 'b']
+	savefile = 'mixture_data'
+	
 	
 	if random.randint(0, 1) == 1:
 	   inports[0], inports[1] = inports[1], inports[0]
@@ -225,7 +227,9 @@ def multi_np(outports = [31, 37], outports2 = [31, 33], switch = 0, inports = [1
 			if random.randint(0, 1) == 1:
 			   inports[0], inports[1] = inports[1], inports[0]
 			block += 1
+			print('Begin 5 minute intermission.')
 			time.sleep(intermission * 60)
+			print('End of intermission.')
 			starttime = time.time()
 			curtime = time.time()
 	   	        elapsedtime = round((curtime - starttime)/60, 2)
@@ -242,51 +246,63 @@ def multi_np(outports = [31, 37], outports2 = [31, 33], switch = 0, inports = [1
         bold = xlwt.easyxf('font: bold 1')
 
 #Check for current data log
-        if os.path.isfile('joe_data/'+str(rat)):
-            dataold = xlrd.open_workbook('joe_data/'+str(rat),formatting_info=True)
-            book = copy(dataold)
+if os.path.isfile('joe_data/'+str(savefile)):
+    dataold = xlrd.open_workbook('joe_data/'+str(savefile),formatting_info=True)
+    book = copy(dataold)
+    if rat in dataold.sheet_names():
+        sheetrd = dataold.sheet_by_name(rat)
+        currow = sheetrd.nrows
+    else:
+        sheet1 = book.add_sheet(rat)
+        currow = 2
     
-        else:
-            book = xlwt.Workbook()
+else:
+    book = xlwt.Workbook()
+    sheet1 = book.add_sheet(rat)
+    currow = 2
     
-#Create sheet and write file headings/structure
-        sheet1 = book.add_sheet(str('%02d' % d.year)+str('%02d' % d.month)+str('%02d' % d.day))
-        sheet1.write(0, 0, 'Taste 1 Block 1', bold)
-        sheet1.write(0, 1, 'Taste 2 Block 1', bold)
-        sheet1.write(0, 3, 'Taste 1 Block 2', bold)
-        sheet1.write(0, 4, 'Taste 2 Block 2', bold)
-
-
-        for i in range(len(b1ports)):
-            if b1ports[i] == 31:
-                b1taste[i] = 'H2O'
-            elif b1ports[i] == 33:
-                b1taste[i] = 'Sucrose'
-            elif b1ports[i] >= 35:
-                b1taste[i] = 'NaCl'
-                
-        for i in range(len(outports)):
-            if outports[i] == 31:
-                taste[i] = 'H2O'
-            elif outports[i] == 33:
-                taste[i] = 'Sucrose'
-            elif outports[i] >= 35:
-                taste[i] = 'NaCl'
-                
-#Write behavioral data to file
-        for i in range(len(b1taste)):
-            sheet1.write(1, i, b1taste[i])
-        for i in range(len(b1pokes)):
-            sheet1.write(2, i, b1pokes[i])
+   #Create sheet and write file headings/structure
+    sheet1.write(0, 0, 'Date', bold)
+    sheet1.write(0, 1, 'Taste 1 Block 1', bold)
+    sheet1.write(0, 2, 'Taste 2 Block 1', bold)
+    sheet1.write(0, 3, 'Taste 1 Block 2', bold)
+    sheet1.write(0, 4, 'Taste 2 Block 2', bold)
+    
+    for i in range(len(b1ports)):
+        if b1ports[i] == 31:
+            b1taste[i] = 'H2O'
+        elif b1ports[i] == 33:
+            b1taste[i] = 'Sucrose'
+        elif b1ports[i] >= 35:
+            b1taste[i] = 'NaCl'
         
-        for i in range(len(taste)):
-            sheet1.write(1, i+3, taste[i])
-        for i in range(len(pokecounter)):
-            sheet1.write(2, i+3, pokecounter[i])
+    for i in range(len(outports)):
+        if outports[i] == 31:
+            taste[i] = 'H2O'
+        elif outports[i] == 33:
+            taste[i] = 'Sucrose'
+        elif outports[i] >= 35:
+            taste[i] = 'NaCl'
+            
+    for i in range(len(b1taste)):
+        sheet1.write(1, i+1, b1taste[i])
+    for i in range(len(taste)):
+        sheet1.write(1, i+3, taste[i])
 
+            
+# Write behavioral data to file
 
+sheet1.write(currow, 0, str('%02d' % d.year)+str('%02d' % d.month)+str('%02d' % d.day))
+
+for i in range(len(b1pokes)):
+    sheet1.write(currow, i+1, b1pokes[i])
+    
+for i in range(len(pokecounter)):
+    sheet1.write(currow, i+3, pokecounter[i])
+    
 #Save data file
-        book.save('joe_data/'+str(rat))
+book.save('joe_data/'+str(savefile))
+        
         
 	print('Nose poking preference task has been completed.')
 
