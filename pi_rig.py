@@ -142,22 +142,18 @@ def basic_np(outport = 31, intaninput = 5, opentime = 0.012, iti = [.4, 1, 2], t
 
 
 # Multiple nose poke procedure for preference measurements 
-def multi_np(outports = [31, 37], inport = 13, opentimes = [0.1, .1], iti = [3, 4], rat = 'JW41'):
+def multi_np(outports = [31, 35, 35, 31], intaninputs = [5, 7, 7, 5], inport = 13, opentimes = [.1, .1, .1, .1], iti = [3, 4], rat = 'JW41'):
 
 	GPIO.setmode(GPIO.BOARD)
 	outtime = 0.1
-	trial = 1
-	block = 1
 	maxtime = 5
-	intermission = 1
-	pokeside = []
+	intermission = 5
 	houselight = 18
 	pokelight = 38
-	intaninputs = [5, 7]
-	pokecounter = [0, 0]
-	taste = ['a', 'b']
+	pokecounter = [0] * len(outports)
+	taste = ['a'] * len(outports)
 	savefile = 'mixture_data'
-	
+
 	
 	GPIO.setup(pokelight, GPIO.OUT)
 	GPIO.setup(inport, GPIO.IN)
@@ -176,7 +172,7 @@ def multi_np(outports = [31, 37], inport = 13, opentimes = [0.1, .1], iti = [3, 
 		starttime = time.time()
 		curtime = time.time()
 		elapsedtime = round((curtime - starttime)/60, 2)
-
+    
 		while elapsedtime <= maxtime:
 			# Check for pokes
 			if GPIO.input(inport) == 0:
@@ -196,17 +192,20 @@ def multi_np(outports = [31, 37], inport = 13, opentimes = [0.1, .1], iti = [3, 
 		 		GPIO.output(outports[i], 0)
 		 		GPIO.output(intaninputs[i], 0)
 		 		pokecounter[i] += 1
-		 			
+		 		
+		 		if pokecounter[i] == 1:
+		 		       starttime = time.time()
+		 		
 		 		print('Poke! '+str(elapsedtime)+' minutes elapsed. Poke counter: '+str(pokecounter))
 		 		delay = floor((random.random()*(iti[1]-iti[0]))*100)/100+iti[0]
 		 		time.sleep(delay)
 	   	        curtime = time.time()
 	   	        elapsedtime = round((curtime - starttime)/60, 2)
 
-		if i == 0:
+		if i < len(outports):
 		        GPIO.output(houselight, 0)
 			GPIO.output(pokelight, 0)
-			print('Begin 1 minute intermission. Beverages and snacks are available for purchase in the lobby.')
+			print('Begin 5 minute intermission. Beverages and snacks are available for purchase in the lobby.')
 			time.sleep(intermission * 60)
 			print('End of intermission; please resume regularly scheduled poking.')
 			starttime = time.time()
