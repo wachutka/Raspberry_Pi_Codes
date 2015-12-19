@@ -142,12 +142,12 @@ def basic_np(outport = 31, intaninput = 5, opentime = 0.012, iti = [.4, 1, 2], t
 
 
 # Multiple nose poke procedure for preference measurements 
-def multi_np(outports = [31, 35, 35, 31], intaninputs = [5, 7, 7, 5], inport = 13, opentimes = [.1, .1, .1, .1], iti = [3, 4], rat = 'JW41'):
+def multi_np(outports = [31, 35, 31, 35], intaninputs = [5, 7, 5, 7], inport = 13, opentimes = [.1, .1, .1, .1], iti = [3, 4], rat = 'JW41'):
 
 	GPIO.setmode(GPIO.BOARD)
 	outtime = 0.1
 	maxtime = 5
-	intermission = 5
+	intermission = 1
 	houselight = 18
 	pokelight = 38
 	pokecounter = [0] * len(outports)
@@ -218,7 +218,7 @@ def multi_np(outports = [31, 35, 35, 31], intaninputs = [5, 7, 7, 5], inport = 1
 	GPIO.output(pokelight, 0)
 
 	print('Nose poking preference task has been completed. Thank you for your participation!')
-
+	print('Poke counter: '+str(pokecounter))
 ''' 	
 	d = datetime.date.today()
         bold = xlwt.easyxf('font: bold 1')
